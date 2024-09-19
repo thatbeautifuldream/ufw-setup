@@ -27,6 +27,8 @@ sudo ufw allow 3000/tcp
 sudo ufw allow 3001/tcp
 sudo ufw allow 4000/tcp
 sudo ufw allow 4001/tcp
+sudo ufw allow 5000/tcp
+sudo ufw allow 5001/tcp
 
 # Enable UFW
 sudo ufw --force enable
@@ -42,3 +44,4 @@ sudo ufw reload
 sudo ufw status verbose
 
 echo "UFW setup complete. All necessary ports are now open."
+
