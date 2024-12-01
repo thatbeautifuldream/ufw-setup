@@ -1,37 +1,42 @@
 #!/bin/bash
 
-# Script to set up UFW and open necessary ports for SSH and Nginx Proxy Manager
+# Script to set up UFW and manage necessary ports
 
 echo "Starting UFW setup..."
 
 # Update package lists
 sudo apt-get update
 
-# Install UFW if it's not already installed
-sudo apt-get install -y ufw
+# Check if UFW is installed, install it if not
+if ! command -v ufw &> /dev/null; then
+    echo "UFW not found. Installing..."
+    sudo apt-get install -y ufw
+else
+    echo "UFW is already installed."
+fi
 
-# Allow SSH (port 22)
-sudo ufw allow 22/tcp
+# Default ports to always allow 22 for nginx proxy manager admin ui
+default_ports=(22 80 443 81)
 
-# Allow HTTP (port 80)
-sudo ufw allow 80/tcp
+# Custom application ports (Add your custom ports here)
+app_ports=(2001 3001 3002 4001 5001 6001)
 
-# Allow HTTPS (port 443)
-sudo ufw allow 443/tcp
+# Combine all ports into a single array
+all_ports=("${default_ports[@]}" "${app_ports[@]}")
 
-# Allow Nginx Proxy Manager Admin Panel (port 81)
-sudo ufw allow 81/tcp
+# Open the specified ports
+for port in "${all_ports[@]}"; do
+    echo "Allowing port $port..."
+    sudo ufw allow "${port}/tcp"
+done
 
-# Allow custom application ports
-sudo ufw allow 3000/tcp
-sudo ufw allow 3001/tcp
-sudo ufw allow 4000/tcp
-sudo ufw allow 4001/tcp
-sudo ufw allow 5000/tcp
-sudo ufw allow 5001/tcp
-
-# Enable UFW
-sudo ufw --force enable
+# Enable UFW if not already enabled
+if sudo ufw status | grep -q "inactive"; then
+    echo "Enabling UFW..."
+    sudo ufw --force enable
+else
+    echo "UFW is already enabled."
+fi
 
 # Set default policies to deny all incoming connections except allowed ones
 sudo ufw default deny incoming
@@ -43,5 +48,4 @@ sudo ufw reload
 # Display UFW status to verify the rules
 sudo ufw status verbose
 
-echo "UFW setup complete. All necessary ports are now open."
-
+echo "UFW setup complete. All specified ports are now open."
